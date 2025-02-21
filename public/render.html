@@ -17,11 +17,32 @@
             height: 100%;
             overflow: hidden;
         }
+        .testBtn{
+            width: 100px;
+            height: 30px;
+            position: absolute;
+            top: 20px;
+            left: 20px;
+        }
     </style>
 </head>
 <body>
+    <div style="position: fixed; top: 100px; left: 10px; z-index: 100;">
+        <input type="text" id="testInput" placeholder="测试输入同步">
+    </div>
+    <button id="button" class="testBtn">
+       <a href="https://www.baidu.com">跳转</a>
+    </button>
     <canvas id="renderCanvas"></canvas>
     <script>
+
+        document.onload=function(){
+            const button = document.getElementById('button');
+            button.addEventListener('click',()=>{
+               document.body.style.backgroundColor='#eee';
+            });
+        };
+
         const canvas = document.getElementById('renderCanvas');
         const engine = new BABYLON.Engine(canvas, true);
         let scene = null;
@@ -38,20 +59,6 @@
 
             return scene;
         }
-
-        // 处理来自服务器的交互事件
-        window.handleServerEvent = (data) => {
-            if (!scene) return;
-
-            const boxMesh = scene.getMeshByName('box');
-            if (boxMesh && data.rotation) {
-                boxMesh.rotation.set(
-                    data.rotation.x,
-                    data.rotation.y,
-                    data.rotation.z
-                );
-            }
-        };
 
         createScene().then(createdScene => {
             scene = createdScene;

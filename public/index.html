@@ -1,16 +1,19 @@
 <!DOCTYPE html>
 <html>
+
 <head>
     <meta charset="utf-8">
     <title>Babylon.js SSR Demo</title>
     <style>
-        html, body {
+        html,
+        body {
             margin: 0;
             padding: 0;
             width: 100%;
             height: 100%;
             overflow: hidden;
         }
+
         #renderCanvas {
             width: 100%;
             height: 100%;
@@ -18,7 +21,12 @@
         }
     </style>
 </head>
+
 <body>
+    <div style="position: fixed; top: 10px; left: 200px; z-index: 100;">
+        <input type="text" id="testInput" placeholder="测试输入同步">
+        <button onclick="window.history.back()">返回</button>
+    </div>
     <canvas id="renderCanvas"></canvas>
     <script>
         const canvas = document.getElementById('renderCanvas');
@@ -49,46 +57,91 @@
             }
         };
 
-        // 处理用户交互
-        let isMouseDown = false;
-        let lastX = 0;
-        let lastY = 0;
-
-        canvas.addEventListener('mousedown', (event) => {
-            isMouseDown = true;
-            lastX = event.clientX;
-            lastY = event.clientY;
-        });
-
-        canvas.addEventListener('mousemove', (event) => {
-            if (!isMouseDown) return;
-
-            const deltaX = event.clientX - lastX;
-            const deltaY = event.clientY - lastY;
-
-            // 发送交互事件到服务器
+        // 鼠标移动事件
+        document.addEventListener('mousemove', (e) => {
             ws.send(JSON.stringify({
                 type: 'interaction',
                 data: {
-                    rotation: {
-                        x: deltaY * 0.01,
-                        y: deltaX * 0.01,
-                        z: 0
-                    }
+                    type: 'mousemove',
+                    x: e.clientX,
+                    y: e.clientY
                 }
             }));
-
-            lastX = event.clientX;
-            lastY = event.clientY;
         });
 
-        canvas.addEventListener('mouseup', () => {
-            isMouseDown = false;
+        // 鼠标按下事件
+        document.addEventListener('mousedown', (e) => {
+            ws.send(JSON.stringify({
+                type: 'interaction',
+                data: {
+                    type: 'mousedown',
+                    x: e.clientX,
+                    y: e.clientY,
+                    button: e.button // 0: 左键, 1: 中键, 2: 右键
+                }
+            }));
         });
 
-        canvas.addEventListener('mouseleave', () => {
-            isMouseDown = false;
+        // 鼠标释放事件
+        document.addEventListener('mouseup', (e) => {
+            ws.send(JSON.stringify({
+                type: 'interaction',
+                data: {
+                    type: 'mouseup',
+                    x: e.clientX,
+                    y: e.clientY,
+                    button: e.button
+                }
+            }));
         });
+
+        // 鼠标滚轮事件
+        document.addEventListener('wheel', (e) => {
+            ws.send(JSON.stringify({
+                type: 'interaction',
+                data: {
+                    type: 'wheel',
+                    x: e.clientX,
+                    y: e.clientY,
+                    deltaY: e.deltaY
+                }
+            }));
+        });
+
+        // 键盘按下事件
+        document.addEventListener('keydown', (e) => {
+            ws.send(JSON.stringify({
+                type: 'interaction',
+                data: {
+                    type: 'keydown',
+                    key: e.key
+                }
+            }));
+        });
+
+        // 键盘释放事件
+        document.addEventListener('keyup', (e) => {
+            ws.send(JSON.stringify({
+                type: 'interaction',
+                data: {
+                    type: 'keyup',
+                    key: e.key
+                }
+            }));
+        });
+
+        document.getElementById('testInput').addEventListener('input', (e) => {
+            ws.send(JSON.stringify({
+                type: 'interaction',
+                data: {
+                    type: 'input',
+                    selector: '#testInput',
+                    value: e.target.value
+                }
+            }));
+        });
+
     </script>
 </body>
+
 </html>
