@@ -1,0 +1,21 @@
+{
+  "name": "babylonjs_ssr",
+  "version": "1.0.0",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "type": "module",
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "@babylonjs/core": "^7.50.0",
+    "@babylonjs/serializers": "^7.50.0",
+    "express": "^4.21.2",
+    "ws": "^8.18.0",
+    "puppeteer": "^21.11.0"
+  }
+}
