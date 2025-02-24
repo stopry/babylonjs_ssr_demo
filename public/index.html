@@ -24,7 +24,7 @@
 
 <body>
     <div style="position: fixed; top: 10px; left: 200px; z-index: 100;">
-        <input type="text" id="testInput" placeholder="测试输入同步">
+        <input type="text" id="testInputIndex" placeholder="测试输入同步">
         <button onclick="window.history.back()">返回</button>
     </div>
     <canvas id="renderCanvas"></canvas>
@@ -46,6 +46,7 @@
         // 处理WebSocket消息
         ws.onmessage = (event) => {
             const data = JSON.parse(event.data);
+            console.log('收到消息:', data); // 添加调试日志
             if (data.type === 'render') {
                 // 显示服务端渲染的画面
                 const img = new Image();
@@ -54,6 +55,43 @@
                     ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
                 };
                 img.src = 'data:image/png;base64,' + data.data;
+            }
+            else if (data.type === 'createInput') {
+                console.log('创建输入框:', data.data);
+                // 创建输入框
+                let input = document.querySelector('#' + data.data.id);
+                if (!input) {
+                    input = document.createElement('input');
+                    input.type = 'text';
+                    input.id = data.data.id;
+                    input.placeholder = data.data.placeholder;
+                    input.value = data.data.value;
+                    input.style.position = 'fixed';
+                    input.style.top = data.data.rect.top + 'px';
+                    input.style.left = data.data.rect.left + 'px';
+                    input.style.width = data.data.rect.width + 'px';
+                    input.style.height = data.data.rect.height + 'px';
+                    input.style.zIndex = 100;
+                    
+                    // 监听输入变化
+                    input.addEventListener('input', (e) => {
+                        ws.send(JSON.stringify({
+                            type: 'serverMethod',
+                            method: 'syncInput',
+                            data: {
+                                id: e.target.id,
+                                value: e.target.value
+                            }
+                        }));
+                    });
+                    
+                    // 添加失焦事件处理
+                    input.addEventListener('blur', (e) => {
+                        document.body.removeChild(e.target);
+                    });
+                    document.body.appendChild(input);
+                    input.focus();
+                }
             }
         };
 
@@ -130,12 +168,12 @@
             }));
         });
 
-        document.getElementById('testInput').addEventListener('input', (e) => {
+        document.getElementById('testInputIndex').addEventListener('input', (e) => {
             ws.send(JSON.stringify({
                 type: 'interaction',
                 data: {
                     type: 'input',
-                    selector: '#testInput',
+                    selector: '#testInputIndex',
                     value: e.target.value
                 }
             }));
